@@ -26,10 +26,12 @@ class Board(width: Int, height: Int) {
     for {
       dx <- Range(-1, 1).inclusive
       dy <- Range(-1, 1).inclusive
-      if (dx != 0 || dy != 0)
-        } {
+      if dx != 0 || dy != 0
+    } {
       try {
-        if (board(x + dx)(y + dy)==true) {
+        val wrapped_x = (x + dx + width) % width
+        val wrapped_y = (y + dy + height) % height
+        if (board(wrapped_x)(wrapped_y)==true) {
           livingNeighbours += 1
         }
       } catch {
