@@ -2,7 +2,7 @@ import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
 import scala.util.Try
 
-class Board(width: Int, height: Int) {
+class Board(width: Int, height: Int, rules: Rules) {
   private type Creature = Boolean
   private type BoardType = ArrayBuffer[ArrayBuffer[Creature]]
 
@@ -13,8 +13,8 @@ class Board(width: Int, height: Int) {
 
   private def willLive(x: Int, y: Int): Boolean = {
     val neighbours = livingNeighbours(x, y)
-    if ((board(x)(y)==true && (neighbours==2 || neighbours==3)) ||
-        (board(x)(y)==false && neighbours==3)) {
+    if ((board(x)(y)==true && rules.survive(neighbours)) ||
+        (board(x)(y)==false && rules.birth(neighbours))) {
       return true
     } else {
       return false
@@ -69,11 +69,17 @@ class Board(width: Int, height: Int) {
   }
 }
 
+class Rules(livingConditions: String, deadConditions: String) {
+  val survive = livingConditions.map(_.asDigit).toSet
+  val birth = deadConditions.map(_.asDigit).toSet
+}
+
 object Main {
   def main(args: Array[String]) = {
     val gol = new Board(
       Try(args(0)).getOrElse("40").toInt,
-      Try(args(1)).getOrElse("40").toInt)
+      Try(args(1)).getOrElse("40").toInt,
+      new Rules("23","3"))
     while (true) {
       print("\n")
       println(gol)
