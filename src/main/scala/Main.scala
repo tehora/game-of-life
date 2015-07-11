@@ -3,21 +3,31 @@ import scala.util.Random
 import scala.util.Try
 
 class Board(width: Int, height: Int) {
-  type Creature = Boolean
+  private type Creature = Boolean
   private type BoardType = ArrayBuffer[ArrayBuffer[Creature]]
 
-  def newBoard(width: Int, height: Int)(func: => Creature): BoardType =
+  private def newBoard(width: Int, height: Int)(func: => Creature): BoardType =
     ArrayBuffer.fill[Creature](width, height){func}
 
   var board = newBoard(width, height){Random.nextBoolean()}
 
-  def willLive(x: Int, y: Int): Boolean = {
+  private def willLive(x: Int, y: Int): Boolean = {
+    val neighbours = livingNeighbours(x, y)
+    if ((board(x)(y)==true && (neighbours==2 || neighbours==3)) ||
+        (board(x)(y)==false && neighbours==3)) {
+      return true
+    } else {
+      return false
+    }
+  }
+
+  private def livingNeighbours(x: Int, y: Int): Int = {
     var livingNeighbours = 0
     for {
       dx <- Range(-1, 1).inclusive
       dy <- Range(-1, 1).inclusive
       if (dx != 0 || dy != 0)
-    } {
+        } {
       try {
         if (board(x + dx)(y + dy)==true) {
           livingNeighbours += 1
@@ -26,13 +36,7 @@ class Board(width: Int, height: Int) {
         case e: IndexOutOfBoundsException => ()
       }
     }
-
-    if ((board(x)(y)==true && (livingNeighbours==2 || livingNeighbours==3)) ||
-        (board(x)(y)==false && livingNeighbours==3)) {
-      return true
-    } else {
-      return false
-    }
+    livingNeighbours
   }
 
   private def computeGeneration: BoardType = {
