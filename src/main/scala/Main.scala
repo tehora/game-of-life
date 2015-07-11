@@ -2,7 +2,7 @@ import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
 import scala.util.Try
 
-class Board(width: Int, height: Int, rules: Rules) {
+class Board(width: Int, height: Int, rules: Rules, mutationChance: Int) {
   private type Creature = Boolean
   private type BoardType = ArrayBuffer[ArrayBuffer[Creature]]
 
@@ -48,6 +48,9 @@ class Board(width: Int, height: Int, rules: Rules) {
       y <- Range(0, height)
     } {
       nextBoard(x)(y) = willLive(x, y)
+      if (mutationChance > 0 && Random.nextInt() % mutationChance == 0) {
+        nextBoard(x)(y) = !nextBoard(x)(y)
+      }
     }
     nextBoard
   }
@@ -59,9 +62,9 @@ class Board(width: Int, height: Int, rules: Rules) {
     val rows = for(y <- Range(0, height)) yield {
       val row = for(x <- Range(0, width)) yield {
         if (board(x)(y))
-          "\033[32mX\033[0m"
+          "X"
         else
-          "\033[31mX\033[0m"
+          "_"
       }
       row.mkString
     }
@@ -79,7 +82,8 @@ object Main {
     val gol = new Board(
       Try(args(0)).getOrElse("40").toInt,
       Try(args(1)).getOrElse("40").toInt,
-      new Rules("23","3"))
+      new Rules("23","3"),
+      1000)
     while (true) {
       print("\n")
       println(gol)
