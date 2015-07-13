@@ -13,8 +13,8 @@ class Board(width: Int, height: Int, rules: Rules, mutationChance: Int) {
 
   private def willLive(x: Int, y: Int): Boolean = {
     val neighbours = livingNeighbours(x, y)
-    if ((board(x)(y)==true && rules.survive(neighbours)) ||
-        (board(x)(y)==false && rules.birth(neighbours))) {
+    if ((board(x)(y) && rules.survive(neighbours)) ||
+        (!board(x)(y) && rules.birth(neighbours))) {
       return true
     } else {
       return false
@@ -24,18 +24,14 @@ class Board(width: Int, height: Int, rules: Rules, mutationChance: Int) {
   private def livingNeighbours(x: Int, y: Int): Int = {
     var livingNeighbours = 0
     for {
-      dx <- Range(-1, 1).inclusive
-      dy <- Range(-1, 1).inclusive
+      dx <- -1 to 1
+      dy <- -1 to 1
       if dx != 0 || dy != 0
     } {
-      try {
-        val wrapped_x = (x + dx + width) % width
-        val wrapped_y = (y + dy + height) % height
-        if (board(wrapped_x)(wrapped_y)==true) {
-          livingNeighbours += 1
-        }
-      } catch {
-        case e: IndexOutOfBoundsException => ()
+      val wrapped_x = (x + dx + width) % width
+      val wrapped_y = (y + dy + height) % height
+      if (Try(board(wrapped_x)(wrapped_y)).getOrElse(false)) {
+        livingNeighbours += 1
       }
     }
     livingNeighbours
@@ -83,7 +79,7 @@ object Main {
       Try(args(0)).getOrElse("40").toInt,
       Try(args(1)).getOrElse("40").toInt,
       new Rules("23","3"),
-      1000)
+      0)
     while (true) {
       print("\n")
       println(gol)
