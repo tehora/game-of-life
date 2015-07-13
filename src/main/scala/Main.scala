@@ -3,6 +3,10 @@ import scala.util.Random
 import scala.util.Try
 
 class Board(width: Int, height: Int, rules: Rules, mutationChance: Int) {
+  def this(width: Int, height: Int, rules: Rules) = {
+    this(width, height, rules, 0)
+  }
+
   private type Creature = Boolean
   private type BoardType = ArrayBuffer[ArrayBuffer[Creature]]
 
@@ -75,16 +79,25 @@ class Rules(livingConditions: String, deadConditions: String) {
 
 object Main {
   def main(args: Array[String]) = {
-    val gol = new Board(
-      Try(args(0)).getOrElse("40").toInt,
-      Try(args(1)).getOrElse("40").toInt,
-      new Rules("23","3"),
-      0)
-    while (true) {
-      print("\n")
-      println(gol)
-      Thread.sleep(100)
-      gol.nextGeneration()
+    val mode = Try(args(0)).getOrElse("--gui")
+    mode match {
+      case "--tui" => {
+        val width = Try(args(1)).getOrElse("40").toInt
+        val height = Try(args(2)).getOrElse("40").toInt
+        val survivalRules = Try(args(3)).getOrElse("23")
+        val birthRules = Try(args(4)).getOrElse("3")
+
+        val gol = new Board(width, height, new Rules(survivalRules, birthRules))
+        while (true) {
+          print("\n")
+          println(gol)
+          Thread.sleep(100)
+          gol.nextGeneration()
+        }
+      }
+      case "--gui" => {
+        val gui = new GoLFrame
+      }
     }
   }
 }
